@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+    <header>
+        <h1>Login</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html" id="navHome">Home</a></li>
+            <li><a href="reservation.html" id="navReservations">Reservations</a></li>
+            <li><a href="about.html" id="navAbout">About Us</a></li>
+        </ul>
+    </nav>
+    
+    <div class="login-container">
+        <form id="loginForm">
+            <label for="username" style="color: #ebcd95;">Username:</label>
+            <input type="text" id="username" required>
+            
+            <label for="password" style="color: #ebcd95;">Password:</label>
+            <input type="password" id="password" required>
+            
+            <button type="submit">Login</button>
+        </form>
+        <p>Don't have an account? <a href="register.html" style="color: #ebcd95;">Sign Up</a></p>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                const response = await fetch("http://localhost:3000/api/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("✅ Login Successful!");
+                    localStorage.setItem('loggedInUser', username);
+                    window.location.href = 'index.html';
+                } else {
+                    alert("❌ " + data.message);
+                    const messageDiv = document.getElementById('loginMessage');
+                    if (messageDiv) {
+                        messageDiv.textContent = data.message;
+                        messageDiv.style.color = 'red';
+                    }
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("❌ Server Error");
+            }
+        });
+    </script>
+</body>
+</html>

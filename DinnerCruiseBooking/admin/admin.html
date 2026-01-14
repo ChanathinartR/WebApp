@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: #fff;
+            padding: 20px;
+        }
+        h2 {
+            color: #ebcd95;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, textarea, button {
+            padding: 8px;
+            width: 100%;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #ebcd95;
+            color: #111;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #555;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #333;
+        }
+    </style>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h2>Admin: Add Cruise Type</h2>
+    <form id="cruiseForm">
+        <label for="cruiseType">Cruise Type</label>
+        <input type="text" id="cruiseType" required>
+
+        <label for="windowSeats">Window Seats</label>
+        <input type="number" id="windowSeats" required min="0">
+
+        <label for="centerSeats">Center Seats</label>
+        <input type="number" id="centerSeats" required min="0">
+
+        <label for="basePrice">Base Price (THB)</label>
+        <input type="number" id="basePrice" required min="0">
+
+        <button type="submit">Add Cruise Type</button>
+    </form>
+
+    <h2>All Reservations</h2>
+    <button onclick="loadReservations()">Load Reservations</button>
+    <table id="reservationTable">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Cruise Type</th>
+                <th>Seating Zone</th>
+                <th>Number of People</th>
+                <th>Total Cost</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        document.getElementById("cruiseForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const cruiseType = document.getElementById("cruiseType").value.trim();
+            const windowSeats = parseInt(document.getElementById("windowSeats").value);
+            const centerSeats = parseInt(document.getElementById("centerSeats").value);
+            const basePrice = parseInt(document.getElementById("basePrice").value);
+
+            if (isNaN(windowSeats) || isNaN(centerSeats) || isNaN(basePrice) || windowSeats < 0 || centerSeats < 0 || basePrice < 0) {
+                alert("Please enter valid seat numbers and base price.");
+                return;
+            }
+
+            const cruiseData = {
+                cruiseType,
+                windowSeats,
+                centerSeats,
+                price: basePrice,
+                seatPrice: {
+                    window: 700,
+                    center: 0
+                }
+            };
+
+            fetch('/addCruiseType', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(cruiseData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                document.getElementById("cruiseForm").reset();
+            })
+            .catch(err => {
+                console.error("Error adding cruise type:", err);
+                alert("Error adding cruise type");
+            });
+        });
+        // 
+
+        function loadReservations() {
+            fetch('/getReservations')
+                .then(res => res.json())
+                .then(data => {
+                    const tableBody = document.querySelector("#reservationTable tbody");
+                    tableBody.innerHTML = "";
+
+                    if (data.length === 0) {
+                        tableBody.innerHTML = `<tr><td colspan="5">No successful bookings found.</td></tr>`;
+                        return;
+                    }
+
+                    data.forEach(reservation => {
+                        const row = document.createElement("tr");
+
+                        row.innerHTML = `
+                            <td>${reservation.username}</td>
+                            <td>${reservation.cruiseType}</td>
+                            <td>${reservation.seatZone}</td>
+                            <td>${reservation.numPeople}</td>
+                            <td>฿${reservation.totalCost}</td>
+                        `;
+
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(err => {
+                    console.error("Error loading reservations:", err);
+                });
+        }
+    </script>
+</body>
+</html>

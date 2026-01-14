@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Sign Up</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html" id="navHome">Home</a></li>
+            <li><a href="reservation.html" id="navReservations">Reservations</a></li>
+            <li><a href="about.html" id="navAbout">About Us</a></li>
+        </ul>
+    </nav>
+    
+    <section>
+        <form id="registerForm">
+            <label for="username" style="color: #ebcd95;">Username:</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="password" style="color: #ebcd95;">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit">Register</button>
+        </form>
+        <p id="registerMessage"></p>
+        <p>Already have an account? <a href="login.html" style="color: #ebcd95;">Login</a></p>
+    </section>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+    
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('http://localhost:3000/api/register', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert('✅ Registration successful!');
+                    window.location.href = 'login.html';
+                } else {
+                    alert("❌ " + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to connect to the server.');
+            }
+        });
+    </script>
+</body>
+</html>

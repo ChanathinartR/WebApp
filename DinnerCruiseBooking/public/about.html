@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dinner Cuisine</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1 style="font-size: 45px;" id="title">About Us</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html" id="homeNav">Home</a></li>
+            <li><a href="reservation.html" id="resvNav">Reservations</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li><a href="register.html" id="loginButton">Sign Up</a></li>  
+        </ul>
+    </nav>
+
+    <button id="languageToggle">TH</button>
+    <p id="userStatus"></p>
+    
+    <section id="support">
+        <h2 style="font-size: 30px; color: #ebcd95;" id="header">Customer Support</h2>
+        <p style="color: #ebcd95;" id="q1">If you have any questions or issues regarding the booking, please contact our support team:</p>
+        
+        <ul style="color: #ebcd95;">
+          <li><strong id="tel">📞 Tel:</strong> 02X-XXX-XXXX</li>
+          <li><strong>📧 Email:</strong> dinnerCruise@gmail.com</li>
+          <li><strong id="oh">⏰ Operating Hours:</strong> 09:00 - 18:00</li>
+          <li><strong>💬 Line Official:</strong> @dinnercruise</li>
+        </ul>
+      
+        <p style="color: #ebcd95;" id="q2">We are happy to assist you every step of the way to make your evening truly special. ❤️</p>
+      </section>
+    
+    <footer>
+        <p>&copy; 2025 Dinner Cuisine. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginButton = document.getElementById('loginButton');
+            const userStatus = document.getElementById('userStatus');
+            const loggedInUser = localStorage.getItem('loggedInUser');
+
+            if (!loginButton || !userStatus) return;
+
+            if (loggedInUser) {
+                loginButton.textContent = `Logout (${loggedInUser})`;
+                loginButton.href = "#";
+                userStatus.textContent = `🔓 Logged in as: ${loggedInUser}`;
+                userStatus.style.color = "green";
+
+                loginButton.addEventListener('click', function () {
+                    localStorage.removeItem('loggedInUser'); 
+                    window.location.reload(); 
+                });
+            }
+        });
+
+        const translations = {
+            en: {
+                title: "About Us",
+                homeNav: "Home",
+                resvNav: "Reservations",
+                header: "Customer Support",
+                q1: "If you have any questions or issues regarding the booking, please contact our support team:",
+                tel: "📞 Tel:",
+                oh: "⏰ Operating Hours:",
+                q2: "We are happy to assist you every step of the way to make your evening truly special. ❤️",
+                languageToggle: "TH"
+            },
+            th: {
+                title: "เกี่ยวกับเรา",
+                homeNav: "หน้าหลัก",
+                resvNav: "จอง",
+                header: "ฝ่ายช่วยเหลือลูกค้า",
+                q1: "หากคุณมีคำถามหรือปัญหาเกี่ยวกับการจอง โปรดติดต่อทีมสนับสนุนของเรา:",
+                tel: "📞 โทร:",
+                oh: "⏰ เวลาทำการ:",
+                q2: "เรายินดีที่จะช่วยเหลือคุณทุกขั้นตอนเพื่อทำให้ค่ำคืนของคุณพิเศษจริงๆ ❤️",
+                languageToggle: "EN"
+            }
+        };
+
+        let currentLanguage = 'en';
+
+        document.getElementById('languageToggle').addEventListener('click', function() {
+            currentLanguage = currentLanguage === 'en' ? 'th' : 'en';
+            applyTranslations();
+        });
+
+        function applyTranslations() {
+            const lang = translations[currentLanguage];
+            
+            document.getElementById('title').textContent = lang.title;
+            document.getElementById('homeNav').textContent = lang.homeNav;
+            document.getElementById('resvNav').textContent = lang.resvNav;
+            document.getElementById('header').textContent = lang.header;
+            document.getElementById('q1').textContent = lang.q1; 
+            document.getElementById('tel').textContent = lang.tel; 
+            document.getElementById('oh').textContent = lang.oh; 
+            document.getElementById('q2').textContent = lang.q2; 
+            document.getElementById('languageToggle').textContent = lang.languageToggle;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation - Dinner Cuisine</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1 id="title" style="font-size: 45px;">Make a Reservation</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html" id="navHome">Home</a></li>
+            <li><a href="about.html" id="navAbout">About Us</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li><a href="register.html" id="loginButton">Sign Up</a></li>  
+        </ul>
+    </nav>
+
+    <button id="languageToggle">TH</button>
+    <p id="userStatus"></p>
+    
+    <section id="reservations">
+        <h2 id="bookTitle">Book Your Dinner Cruise</h2>
+        <p id="seatAvailability" style="color: #ebcd95;">Loading available seats...</p>
+        
+        <form id="reservationForm">
+            <label for="cruiseType" id="labelCruise" style="color: #ebcd95;">Choose a Dinner Cruise Type:</label>
+            <select id="cruiseType" name="cruiseType">
+            </select>
+            
+            <label for="seatZone" id="labelSeat" style="color: #ebcd95;">Choose a Seating Zone:</label>
+            <select id="seatZone" name="seatZone">
+            </select>
+            
+            <label for="numPeople" id="labelPeople" style="color: #ebcd95;">Number of People:</label>
+            <input type="number" id="numPeople" name="numPeople" min="1" required>
+            
+            <button type="submit" id="checkAvailability">Check Availability & Calculate Cost</button>
+        </form>
+        <p id="reservationMessage"></p>
+    </section>
+    
+    <section id="confirmation" style="display:none;">
+        <h2 id="confirmTitle" style="font-size: 30px; color: #ebcd95;">Confirm Your Reservation</h2>
+        <p id="confirmationDetails" style="color: #ebcd95;"></p>
+        <p id="Bank" style="font-size: 18px; color: #ebcd95;"><strong>Account : XXX-XXXXXXX Tullathorn (Kasikorn Bank)</strong></p>
+        <img src="qrCode.jpg" width="250" height="250"><br>
+        <button id="confirmBooking">Confirm Booking</button>
+        <button id="cancelBooking">Cancel</button>
+    </section>
+
+    <script>
+        async function populateCruiseOptions() {
+            const response = await fetch('data.json');
+            const data = await response.json();
+
+            const cruiseSelect = document.getElementById('cruiseType');
+            cruiseSelect.innerHTML = ''; // เคลียร์ตัวเลือกเก่า
+
+            for (const cruise in data) {
+                const option = document.createElement('option');
+                const price = data[cruise].price;
+                option.value = cruise;
+                option.textContent = `${cruise} - ฿${price}`;
+                cruiseSelect.appendChild(option);
+            }
+
+            const firstCruise = Object.values(data)[0];
+            const seatZones = Object.keys(firstCruise.seatPrice);
+
+            const seatSelect = document.getElementById('seatZone');
+            seatSelect.innerHTML = ''; // ล้างของเก่า
+            seatZones.forEach(zone => {
+                const zoneOption = document.createElement('option');
+                const extra = firstCruise.seatPrice[zone];
+                zoneOption.value = zone;
+                zoneOption.textContent = `${capitalize(zone)} Seat - ${extra > 0 ? `Extra ฿${extra}` : 'No Extra Cost'}`;
+                seatSelect.appendChild(zoneOption);
+            });
+        }
+
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function capitalizeCruiseName(name) {
+            return name;
+        }
+        //
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginButton = document.getElementById('loginButton');
+            const userStatus = document.getElementById('userStatus'); 
+            const loggedInUser = localStorage.getItem('loggedInUser');
+
+            if (!loginButton || !userStatus) return; 
+
+            if (loggedInUser) {
+                loginButton.textContent = `Logout (${loggedInUser})`;
+                loginButton.href = "#";
+                userStatus.textContent = `🔓 Logged in as: ${loggedInUser}`;
+                userStatus.style.color = "green";
+
+                loginButton.addEventListener('click', function () {
+                    localStorage.removeItem('loggedInUser'); 
+                    window.location.reload(); 
+                });
+            }
+
+            populateCruiseOptions();
+        });
+        
+        async function loadSeatAvailability() {
+            const response = await fetch('data.json');
+            const data = await response.json();
+
+            let tableRows = '';
+
+            for (const cruise in data) {
+                const cruiseData = data[cruise];
+                tableRows += `
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #888;">${capitalizeCruiseName(cruise)}</td>
+                        <td style="padding: 12px; border: 1px solid #888;">${cruiseData.totalSeats}</td>
+                        <td style="padding: 12px; border: 1px solid #888;">${cruiseData.window || 0}</td>
+                        <td style="padding: 12px; border: 1px solid #888;">${cruiseData.center || 0}</td>
+                    </tr>
+                `;
+            }
+
+            document.getElementById('seatAvailability').innerHTML = `
+                <table style="
+                    color: #ebcd95;
+                    border-collapse: collapse;
+                    margin-top: 10px;
+                    font-size: 18px;
+                    width: 100%;
+                    max-width: 600px;
+                ">
+                    <thead>
+                        <tr style="background-color: #333; color: #fff;">
+                            <th id="Ctype" style="padding: 12px; border: 1px solid #888;">Cruise Type</th>
+                            <th id="tSeat" style="padding: 12px; border: 1px solid #888;">Total Seats</th>
+                            <th id="window" style="padding: 12px; border: 1px solid #888;">Window</th>
+                            <th id="center" style="padding: 12px; border: 1px solid #888;">Center</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        document.getElementById('reservationForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const response = await fetch('data.json');
+            const data = await response.json();
+            
+            const cruiseType = document.getElementById('cruiseType').value;
+            const seatZone = document.getElementById('seatZone').value;
+            const numPeople = parseInt(document.getElementById('numPeople').value);
+            
+            if (numPeople > data[cruiseType][seatZone]) {
+                document.getElementById('reservationMessage').textContent = 'Not enough seats available!';
+                document.getElementById('reservationMessage').style.color = 'red';
+                return;
+            }
+            
+            let basePrice = data[cruiseType].price;
+            let seatExtra = data[cruiseType].seatPrice[seatZone];
+            let totalCost = basePrice * numPeople + seatExtra;
+        
+            document.getElementById('confirmationDetails').innerHTML = `
+                <strong style="font-size: 20px;" id="tabH">Reservation Details:</strong><br><br>
+                <table style="
+                    color: #ebcd95;
+                    border-collapse: collapse;
+                    margin-top: 10px;
+                    font-size: 18px;
+                    width: 100%;
+                    max-width: 500px;
+                ">
+                    <tbody>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #888;"><strong id="type">Cruise Type</strong></td>
+                            <td style="padding: 10px; border: 1px solid #888;">${cruiseType}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #888;"><strong id="zone">Seating Zone</strong></td>
+                            <td style="padding: 10px; border: 1px solid #888;">${seatZone}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #888;"><strong id="Pnum">Number of People</strong></td>
+                            <td style="padding: 10px; border: 1px solid #888;">${numPeople}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #888;"><strong id="cost">Total Cost</strong></td>
+                            <td style="padding: 10px; border: 1px solid #888;">฿${totalCost}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            applyTranslations();
+            
+            document.getElementById('reservations').style.display = 'none';
+            document.getElementById('confirmation').style.display = 'block';
+
+            const confirmBtn = document.getElementById('confirmBooking');
+            const newConfirmBtn = confirmBtn.cloneNode(true); 
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn); 
+
+            newConfirmBtn.addEventListener('click', async function () {
+                const username = localStorage.getItem('loggedInUser') || "Guest";
+                if (username === "Guest") {
+                    alert("Please log in before making a reservation!");
+                    return;
+                }
+
+                data[cruiseType][seatZone] -= numPeople;
+                data[cruiseType].totalSeats -= numPeople;
+
+                const reservation = {
+                    username, 
+                    cruiseType,
+                    seatZone,
+                    numPeople,
+                    totalCost
+                };
+
+                await fetch('/update-seats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        updatedSeats: data,
+                        reservation: reservation
+                    })
+                });
+
+                alert('Booking Confirmed!');
+                window.location.href = 'index.html';
+            });
+
+            //
+
+            document.getElementById('cancelBooking').addEventListener('click', function() {
+                document.getElementById('reservations').style.display = 'block';
+                document.getElementById('confirmation').style.display = 'none';
+            });
+        });
+        
+        loadSeatAvailability();
+
+        const translations = {
+            en: {
+                title: "Make a Reservation",
+                navHome: "Home",
+                navAbout: "About Us",
+                bookTitle: "Book Your Dinner Cruise",
+                labelCruise: "Choose a Dinner Cruise Type:",
+                labelSeat: "Choose a Seating Zone:",
+                labelPeople: "Number of People:",
+                checkAvailability: "Check Availability & Calculate Cost",
+                confirmTitle: "Confirm Your Reservation",
+                Bank: "Account : XXX-XXXXXXX Tullathorn (Kasikorn Bank)",
+                confirmBooking: "Confirm Booking",
+                cancelBooking: "Cancel",
+                languageToggle: "TH",
+                tabH: "Reservation Details:",
+                type: "Cruise Type",
+                zone: "Seating Zone",
+                Pnum: "Number of People",
+                Ctype: "Cruise Type",
+                cost: "Total Cost",
+                tSeat: "Total Seats",
+                window: "Window",
+                center: "Center",
+                Ctype: "Cruise Type",
+                tSeat: "Total Seats",
+                window: "Window",
+                center: "Center"
+            },
+            th: {
+                title: "ทำการจอง",
+                navHome: "หน้าหลัก",
+                navAbout: "เกี่ยวกับเรา",
+                bookTitle: "จอง Dinner Cruise ของคุณ",
+                labelCruise: "เลือกประเภทของ Dinner Cruise:",
+                labelSeat: "เลือกโซนที่นั่ง:",
+                labelPeople: "จำนวนคน:",
+                checkAvailability: "ตรวจสอบที่นั่งและคำนวณค่าใช้จ่าย",
+                confirmTitle: "ยืนยันการจองของคุณ",
+                Bank: "บัญชี : XXX-XXXXXXX ตุลธร (ธนาคารกสิกร)",
+                confirmBooking: "ยืนยันการจอง",
+                cancelBooking: "ยกเลิก",
+                languageToggle: "EN",
+                tabH: "รายละเอียดการจอง:",
+                type: "ประเภทเรือสำราญ",
+                zone: "โซนที่นั่ง",
+                Pnum: "จำนวนคน",
+                cost: "ค่าใช้จ่ายทั้งหมด",
+                Ctype: "ประเภทเรือสำราญ",
+                tSeat: "ที่นั่งทั้งหมด",
+                window: "ที่นั่งริมหน้าต่าง",
+                center: "ที่นั่งตรงกลาง"
+
+            }
+        };
+
+        let currentLanguage = 'en';
+
+        document.getElementById('languageToggle').addEventListener('click', function() {
+            currentLanguage = currentLanguage === 'en' ? 'th' : 'en';
+            applyTranslations();
+        });
+
+        //
+        //
+
+        function applyTranslations() {
+            const t = translations[currentLanguage];
+
+            document.getElementById('title').textContent = t.title;
+            document.getElementById('navHome').textContent = t.navHome;
+            document.getElementById('navAbout').textContent = t.navAbout;
+            document.getElementById('bookTitle').textContent = t.bookTitle;
+            document.getElementById('labelCruise').textContent = t.labelCruise;
+            document.getElementById('labelSeat').textContent = t.labelSeat;
+            document.getElementById('labelPeople').textContent = t.labelPeople;
+            document.getElementById('checkAvailability').textContent = t.checkAvailability;
+            document.getElementById('confirmTitle').textContent = t.confirmTitle;
+            document.getElementById('Bank').textContent = t.Bank;
+            document.getElementById('confirmBooking').textContent = t.confirmBooking;
+            document.getElementById('cancelBooking').textContent = t.cancelBooking;
+            document.getElementById('languageToggle').textContent = t.languageToggle;
+
+            const tabH = document.getElementById('tabH');
+            if (tabH) tabH.textContent = t.tabH;
+
+            const type = document.getElementById('type');
+            if (type) type.textContent = t.type;
+
+            const zone = document.getElementById('zone');
+            if (zone) zone.textContent = t.zone;
+
+            const pnum = document.getElementById('Pnum');
+            if (pnum) pnum.textContent = t.Pnum;
+
+            const cost = document.getElementById('cost');
+            if (cost) cost.textContent = t.cost;
+
+            const ctype = document.getElementById('Ctype');
+            if (ctype) ctype.textContent = t.Ctype;
+
+            const tseat = document.getElementById('tSeat');
+            if (tseat) tseat.textContent = t.tSeat;
+
+            const window = document.getElementById('window');
+            if (window) window.textContent = t.window;
+
+            const center = document.getElementById('center');
+            if (center) center.textContent = t.center;
+        }
+
+    </script>
+</body>
+</html>

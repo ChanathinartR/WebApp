@@ -1,0 +1,32 @@
+{
+  "Luxury": {
+    "totalSeats": 109,
+    "window": 9,
+    "center": 100,
+    "price": 3500,
+    "seatPrice": {
+      "window": 700,
+      "center": 0
+    }
+  },
+  "Buffet": {
+    "totalSeats": 100,
+    "window": 100,
+    "center": 0,
+    "price": 2650,
+    "seatPrice": {
+      "window": 700,
+      "center": 0
+    }
+  },
+  "A la carte": {
+    "totalSeats": 55,
+    "window": 5,
+    "center": 50,
+    "price": 1750,
+    "seatPrice": {
+      "window": 700,
+      "center": 0
+    }
+  }
+}

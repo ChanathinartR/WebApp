@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dinner Cuisine</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1 style="font-size: 45px;" id="title">Welcome to Dinner Cuisine</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html" id="navHome">Home</a></li>
+            <li><a href="reservation.html" id="navReservations">Reservations</a></li>
+            <li><a href="about.html" id="navAbout">About Us</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li><a href="register.html" id="loginButton">Sign Up</a></li>  
+        </ul>
+    </nav>
+    
+    <button id="languageToggle">TH</button>
+    <p id="userStatus"></p>
+    
+    <section id="hero">
+        <img src="dinner.jpg" alt="Dinner Cuisine" class="hero-img">
+        <img src="dinner2.jpg" alt="Dinner Cuisine" class="hero-img">
+        <img src="dinner3.jpg" alt="Dinner Cuisine" class="hero-img">
+        <h2 style="color: #ebcd95;" id="q1">Experience the best Dinner Cruise</h2>
+        <p style="color: #ebcd95;" id="q2">Luxury, Fine Dining, and an Unforgettable Experience</p>
+        <button onclick="location.href='reservation.html'" id="bookBtn">Book Now</button>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Dinner Cuisine. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginButton = document.getElementById('loginButton');
+            const userStatus = document.getElementById('userStatus'); 
+            const loggedInUser = localStorage.getItem('loggedInUser');
+
+            if (!loginButton || !userStatus) return; 
+
+            if (loggedInUser) {
+                loginButton.textContent = `Logout (${loggedInUser})`;
+                loginButton.href = "#";
+                userStatus.textContent = `🔓 Logged in as: ${loggedInUser}`;
+                userStatus.style.color = "green";
+
+                loginButton.addEventListener('click', function () {
+                    localStorage.removeItem('loggedInUser'); 
+                    window.location.reload(); 
+                });
+            }
+        });
+
+        const translations = {
+            en: {
+                title: "Welcome to Dinner Cuisine",
+                navHome: "Home",
+                navReservations: "Reservations",
+                navAbout: "About Us",
+                q1: "Experience the best Dinner Cruise",
+                q2: "Luxury, Fine Dining, and an Unforgettable Experience",
+                bookBtn: "Book Now",
+                languageToggle: "TH"
+            },
+            th: {
+                title: "ยินดีต้อนรับสู่ Dinner Cruise",
+                navHome: "หน้าหลัก",
+                navReservations: "จอง",
+                navAbout: "เกี่ยวกับเรา",
+                q1: "สัมผัสประสบการณ์ Dinner Cruise ที่ดีที่สุด",
+                q2: "หรูหรา, อาหารชั้นเลิศและประสบการณ์ที่ดีที่สุด",
+                bookBtn: "จองเลย",
+                languageToggle: "EN"
+            }
+        };
+
+        let currentLanguage = 'en';
+
+        document.getElementById('languageToggle').addEventListener('click', function() {
+            currentLanguage = currentLanguage === 'en' ? 'th' : 'en';
+            applyTranslations();
+        });
+
+        function applyTranslations() {
+            const lang = translations[currentLanguage];
+            
+            document.getElementById('title').textContent = lang.title;
+            document.getElementById('navHome').textContent = lang.navHome;
+            document.getElementById('navReservations').textContent = lang.navReservations;
+            document.getElementById('navAbout').textContent = lang.navAbout;
+            document.getElementById('q1').textContent = lang.q1; 
+            document.getElementById('q2').textContent = lang.q2; 
+            document.getElementById('bookBtn').textContent = lang.bookBtn; 
+            document.getElementById('languageToggle').textContent = lang.languageToggle; 
+        }
+    </script>
+</body>
+</html>
